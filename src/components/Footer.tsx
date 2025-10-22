@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { Instagram, Facebook, Twitter, Youtube, Mail, Phone, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import logoImage from '@/assets/logo.png';
+// Use logo from public root so it can be swapped without rebuild
+const logoImage = '/mmerakilogo1.png';
 
 const Footer = () => {
   const handleNewsletterSubmit = (e: React.FormEvent) => {
@@ -35,36 +36,6 @@ const Footer = () => {
 
   return (
     <footer className="bg-gray-900 text-white">
-      {/* Newsletter Section */}
-      <div className="bg-primary py-12">
-        <div className="container mx-auto px-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center max-w-2xl mx-auto"
-          >
-            <h3 className="text-3xl font-bold mb-4">Stay Updated with Mmeraki</h3>
-            <p className="text-lg text-white/90 mb-8">
-              Get the latest event inspirations, exclusive offers, and special surprises delivered to your inbox.
-            </p>
-            <form onSubmit={handleNewsletterSubmit} className="flex max-w-md mx-auto">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                className="bg-white border-0 text-gray-900 placeholder:text-gray-500 rounded-l-full rounded-r-none h-12"
-                required
-              />
-              <Button 
-                type="submit" 
-                className="bg-white text-primary hover:bg-gray-100 rounded-r-full rounded-l-none h-12 px-6"
-              >
-                Subscribe
-              </Button>
-            </form>
-          </motion.div>
-        </div>
-      </div>
 
       {/* Main Footer Content */}
       <div className="py-16">
@@ -76,13 +47,14 @@ const Footer = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              <div className="flex items-center space-x-3 mb-6">
-                <img 
-                  src={logoImage} 
-                  alt="Mmeraki Logo" 
-                  className="h-8 w-auto object-contain"
-                />
-                <span className="text-2xl font-bold">Mmeraki</span>
+              <div className="flex items-center justify-center mb-8">
+                <div className="w-48 h-24 flex items-center justify-center">
+                  <img 
+                    src={logoImage} 
+                    alt="Mmeraki Logo" 
+                    className="h-full w-full object-contain scale-150"
+                  />
+                </div>
               </div>
               <p className="text-gray-300 mb-6 leading-relaxed">
                 Creating unforgettable moments through beautifully crafted events and experiences. 

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
   User, 
   Mail, 
@@ -23,7 +23,8 @@ import {
   CreditCard,
   Bell,
   Shield,
-  LogOut
+  LogOut,
+  Loader2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,16 +36,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import Navbar from '@/components/Navbar';
 import OccasionNav from '@/components/OccasionNav';
 import Footer from '@/components/Footer';
+import { useAuth } from '@/context/AuthContext';
+import { toast } from '@/hooks/use-toast';
+import { api } from '@/lib/api';
 import birthdayImage from '@/assets/birthday-event.jpg';
 import anniversaryImage from '@/assets/anniversary-event.jpg';
 import corporateImage from '@/assets/corporate-event.jpg';
 
 const Profile = () => {
+  const { user, isAuthenticated, updateProfile, logout, isLoading, verifyToken } = useAuth();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [notifications, setNotifications] = useState({
     email: true,
     sms: false,
@@ -52,19 +61,135 @@ const Profile = () => {
     marketing: false
   });
 
-  // Mock user data
-  const user = {
-    name: 'Priya Sharma',
-    email: 'priya.sharma@email.com',
-    phone: '+91 98765 43210',
-    location: 'Delhi NCR',
-    joinDate: '2022-03-15',
-    avatar: '',
-    totalOrders: 12,
-    totalSpent: 45600,
-    memberSince: '2022',
-    loyaltyPoints: 1250
+  // Form state for editing
+  const [formData, setFormData] = useState({
+    full_name: '',
+    email: '',
+    phone_number: '',
+    current_location: 'Delhi',
+    gender: '',
+    date_of_birth: '',
+    profile_icon: ''
+  });
+
+  // Redirect if not authenticated
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  // Ensure profile data is fetched from backend on mount/refresh
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!isLoading && token && (!user || !isAuthenticated)) {
+      // This calls GET /api/auth/verify then GET /api/auth/profile
+      verifyToken();
+    }
+  }, [isLoading, isAuthenticated, user, verifyToken]);
+
+  // Initialize form data when user data is available
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        full_name: user.full_name || '',
+        email: user.email || '',
+        phone_number: user.phone_number || '',
+        current_location: user.current_location || 'Delhi',
+        gender: user.gender || '',
+        date_of_birth: user.date_of_birth || '',
+        profile_icon: user.profile_icon || ''
+      });
+    }
+  }, [user]);
+
+  // Handle form input changes
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
+
+  // Handle profile update
+  const handleUpdateProfile = async () => {
+    if (!user) return;
+    
+    setIsUpdating(true);
+    try {
+      // Convert form data to proper types
+      const updateData = {
+        ...formData,
+        gender: formData.gender as 'male' | 'female' | 'other' | 'prefer_not_to_say' | undefined
+      };
+      
+      await updateProfile(updateData);
+      setIsEditing(false);
+      toast({
+        title: "Profile updated",
+        description: "Your profile has been successfully updated.",
+      });
+    } catch (error) {
+      
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  // Handle account deletion
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+    
+    setIsDeleting(true);
+    try {
+      // Note: Requires backend endpoint to exist
+      const res = await api.delete<any>('/auth/delete-account');
+      if (res || res === undefined) {
+        logout();
+        navigate('/');
+        toast({
+          title: "Account deleted",
+          description: "Your account has been permanently deleted.",
+        });
+      } else {
+        throw new Error('Failed to delete account');
+      }
+    } catch (error) {
+      toast({
+        title: "Deletion failed",
+        description: "Failed to delete account. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center space-x-2">
+          <Loader2 className="w-6 h-6 animate-spin" />
+          <span>Loading profile...</span>
+        </div>
+      </div>
+    );
+  }
+
+  // Show not authenticated state
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Please log in to view your profile</h1>
+          <Button asChild>
+            <Link to="/">Go to Home</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   // Mock orders data
   const orders = [
@@ -183,18 +308,21 @@ const Profile = () => {
           <CardContent className="p-8">
             <div className="flex flex-col md:flex-row items-start md:items-center space-y-4 md:space-y-0 md:space-x-6">
               <Avatar className="w-24 h-24">
-                <AvatarImage src={user.avatar} />
+                <AvatarImage src={user.profile_icon} />
                 <AvatarFallback className="text-2xl">
-                  {user.name.split(' ').map(n => n[0]).join('')}
+                  {user.full_name ? user.full_name.split(' ').map(n => n[0]).join('') : 'U'}
                 </AvatarFallback>
               </Avatar>
               
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
-                  <h1 className="text-3xl font-bold text-gray-900">{user.name}</h1>
+                  <h1 className="text-3xl font-bold text-gray-900">
+                    {user?.full_name || formData.full_name || 'User'}
+                  </h1>
                   <Button
                     variant="outline"
                     onClick={() => setIsEditing(!isEditing)}
+                    disabled={isUpdating}
                   >
                     <Edit className="w-4 h-4 mr-2" />
                     {isEditing ? 'Cancel' : 'Edit Profile'}
@@ -208,26 +336,26 @@ const Profile = () => {
                   </div>
                   <div className="flex items-center">
                     <Phone className="w-4 h-4 mr-2" />
-                    <span>{user.phone}</span>
+                    <span>{user.phone_number || 'Not provided'}</span>
                   </div>
                   <div className="flex items-center">
                     <MapPin className="w-4 h-4 mr-2" />
-                    <span>{user.location}</span>
+                    <span>{user.current_location || 'Not set'}</span>
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-6 mt-4 text-sm text-gray-600">
                   <div className="flex items-center">
                     <Calendar className="w-4 h-4 mr-2" />
-                    <span>Member since {user.memberSince}</span>
+                    <span>Member since {user.created_at ? new Date(user.created_at).getFullYear() : 'Unknown'}</span>
                   </div>
                   <div className="flex items-center">
                     <Package className="w-4 h-4 mr-2" />
-                    <span>{user.totalOrders} orders</span>
+                    <span>{user.past_orders?.length || 0} orders</span>
                   </div>
                   <div className="flex items-center">
                     <CreditCard className="w-4 h-4 mr-2" />
-                    <span>₹{user.totalSpent.toLocaleString()} spent</span>
+                    <span>₹{user.past_orders?.reduce((total, order) => total + (order.total || 0), 0).toLocaleString() || 0} spent</span>
                   </div>
                 </div>
               </div>
@@ -252,7 +380,7 @@ const Profile = () => {
                   <CardTitle className="text-sm font-medium text-gray-600">Total Orders</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{user.totalOrders}</div>
+                  <div className="text-2xl font-bold">{user.past_orders?.length || 0}</div>
                   <p className="text-xs text-gray-600">All time</p>
                 </CardContent>
               </Card>
@@ -262,18 +390,18 @@ const Profile = () => {
                   <CardTitle className="text-sm font-medium text-gray-600">Total Spent</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">₹{user.totalSpent.toLocaleString()}</div>
+                  <div className="text-2xl font-bold">₹{user.past_orders?.reduce((total, order) => total + (order.total || 0), 0).toLocaleString() || 0}</div>
                   <p className="text-xs text-gray-600">All time</p>
                 </CardContent>
               </Card>
               
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Loyalty Points</CardTitle>
+                  <CardTitle className="text-sm font-medium text-gray-600">Wishlist Items</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{user.loyaltyPoints}</div>
-                  <p className="text-xs text-gray-600">Available points</p>
+                  <div className="text-2xl font-bold">{user.wishlisted_items?.length || 0}</div>
+                  <p className="text-xs text-gray-600">Saved items</p>
                 </CardContent>
               </Card>
             </div>
@@ -459,23 +587,30 @@ const Profile = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Account Settings</CardTitle>
+                <p className="text-sm text-gray-600 mt-2">
+                  Fields marked with * were collected during signup. You can add additional information to complete your profile.
+                </p>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <Label htmlFor="firstName">First Name</Label>
+                    <Label htmlFor="full_name">Full Name *</Label>
                     <Input
-                      id="firstName"
-                      defaultValue={user.name.split(' ')[0]}
+                      id="full_name"
+                      value={formData.full_name}
+                      onChange={(e) => handleInputChange('full_name', e.target.value)}
                       disabled={!isEditing}
+                      placeholder="Enter your full name"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="lastName">Last Name</Label>
+                    <Label htmlFor="phone_number">Phone Number</Label>
                     <Input
-                      id="lastName"
-                      defaultValue={user.name.split(' ')[1]}
+                      id="phone_number"
+                      value={formData.phone_number}
+                      onChange={(e) => handleInputChange('phone_number', e.target.value)}
                       disabled={!isEditing}
+                      placeholder="Enter your phone number (optional)"
                     />
                   </div>
                 </div>
@@ -485,36 +620,84 @@ const Profile = () => {
                   <Input
                     id="email"
                     type="email"
-                    defaultValue={user.email}
+                    value={formData.email}
+                    disabled={true}
+                    className="bg-gray-50"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <Label htmlFor="current_location">Location *</Label>
+                    <select
+                      id="current_location"
+                      value={formData.current_location}
+                      onChange={(e) => handleInputChange('current_location', e.target.value)}
+                      disabled={!isEditing}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 disabled:bg-gray-50"
+                    >
+                      <option value="Delhi">🏙️ Delhi</option>
+                      <option value="Hyderabad">🏛️ Hyderabad</option>
+                    </select>
+                  </div>
+                  <div>
+                    <Label htmlFor="gender">Gender</Label>
+                    <select
+                      id="gender"
+                      value={formData.gender}
+                      onChange={(e) => handleInputChange('gender', e.target.value)}
+                      disabled={!isEditing}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 disabled:bg-gray-50"
+                    >
+                      <option value="">Select Gender (optional)</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                      <option value="prefer_not_to_say">Prefer not to say</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <Label htmlFor="date_of_birth">Date of Birth</Label>
+                  <Input
+                    id="date_of_birth"
+                    type="date"
+                    value={formData.date_of_birth}
+                    onChange={(e) => handleInputChange('date_of_birth', e.target.value)}
                     disabled={!isEditing}
+                    placeholder="Select your date of birth (optional)"
                   />
                 </div>
                 
                 <div>
-                  <Label htmlFor="phone">Phone Number</Label>
+                  <Label htmlFor="profile_icon">Profile Image URL</Label>
                   <Input
-                    id="phone"
-                    defaultValue={user.phone}
+                    id="profile_icon"
+                    value={formData.profile_icon}
+                    onChange={(e) => handleInputChange('profile_icon', e.target.value)}
                     disabled={!isEditing}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="location">Location</Label>
-                  <Input
-                    id="location"
-                    defaultValue={user.location}
-                    disabled={!isEditing}
+                    placeholder="https://example.com/your-image.jpg (optional)"
                   />
                 </div>
                 
                 {isEditing && (
                   <div className="flex space-x-2">
-                    <Button>
-                      <Save className="w-4 h-4 mr-2" />
-                      Save Changes
+                    <Button onClick={handleUpdateProfile} disabled={isUpdating}>
+                      {isUpdating ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save className="w-4 h-4 mr-2" />
+                          Save Changes
+                        </>
+                      )}
                     </Button>
-                    <Button variant="outline" onClick={() => setIsEditing(false)}>
+                    <Button variant="outline" onClick={() => setIsEditing(false)} disabled={isUpdating}>
                       Cancel
                     </Button>
                   </div>
@@ -595,10 +778,56 @@ const Profile = () => {
                     <div>
                       <h4 className="font-medium text-red-900">Delete Account</h4>
                       <p className="text-sm text-red-600">
-                        Permanently delete your account and all associated data
+                        Permanently delete your account and all associated data. This action cannot be undone.
                       </p>
                     </div>
-                    <Button variant="destructive">Delete Account</Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" disabled={isDeleting}>
+                          {isDeleting ? (
+                            <>
+                              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                              Deleting...
+                            </>
+                          ) : (
+                            'Delete Account'
+                          )}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            This action cannot be undone. This will permanently delete your account
+                            and remove all your data from our servers including:
+                            <ul className="list-disc list-inside mt-2 space-y-1">
+                              <li>Your profile information</li>
+                              <li>All your orders and order history</li>
+                              <li>Your wishlist items</li>
+                              <li>Your payment methods</li>
+                              <li>All other account data</li>
+                            </ul>
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDeleteAccount}
+                            className="bg-red-600 hover:bg-red-700"
+                            disabled={isDeleting}
+                          >
+                            {isDeleting ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Deleting Account...
+                              </>
+                            ) : (
+                              'Yes, delete my account'
+                            )}
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
               </CardContent>

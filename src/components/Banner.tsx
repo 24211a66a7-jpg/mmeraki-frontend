@@ -9,6 +9,7 @@ interface BannerProps {
   backgroundImage: string;
   ctaText?: string;
   ctaLink?: string;
+  className?: string;
   stats?: Array<{
     icon: React.ReactNode;
     value: string;
@@ -22,64 +23,25 @@ const Banner: React.FC<BannerProps> = ({
   backgroundImage,
   ctaText = "Explore Now",
   ctaLink = "/experiences",
+  className,
   stats = []
 }) => {
   return (
-    <div className="relative h-96 md:h-[500px] overflow-hidden">
+    <div className={className ? className : "relative h-96 md:h-[500px] overflow-hidden"}>
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${backgroundImage})` }}
       />
       
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40" />
+      {/* Overlay disabled to keep image at full visibility */}
+      <div className="absolute inset-0 bg-transparent" />
       
-      {/* Content */}
-      <div className="relative z-10 h-full flex items-center">
-        <div className="container mx-auto px-4">
-          <div className="max-w-2xl">
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-4xl md:text-6xl font-bold text-white mb-4"
-            >
-              {title}
-            </motion.h1>
-            
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              className="text-xl md:text-2xl text-white/90 mb-8"
-            >
-              {subtitle}
-            </motion.p>
-            
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-            >
-              <Button 
-                size="lg" 
-                className="bg-primary hover:bg-primary-dark text-white rounded-full px-8 py-4 text-lg"
-                asChild
-              >
-                <a href={ctaLink}>
-                  {ctaText}
-                  <ArrowRight className="ml-2 w-5 h-5" />
-                </a>
-              </Button>
-            </motion.div>
-          </div>
-        </div>
-      </div>
+      {/* Content removed to keep banner fully image-only */}
       
       {/* Stats */}
       {stats.length > 0 && (
-        <div className="absolute bottom-0 left-0 right-0 bg-white/10 backdrop-blur-sm">
+        <div className="absolute bottom-0 left-0 right-0 bg-transparent">
           <div className="container mx-auto px-4 py-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {stats.map((stat, index) => (

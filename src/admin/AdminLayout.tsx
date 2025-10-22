@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import React from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -7,20 +7,23 @@ import {
   ShoppingCart, 
   Users, 
   BarChart3, 
-  Settings,
-  Menu,
-  X,
   LogOut,
   Tag
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
-import logoImage from '@/assets/logo.png';
+// Use logo from public root so it can be swapped without rebuild
+const logoImage = '/mmerakilogo1.png';
 
 const AdminLayout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { logout } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/');
+  };
 
   const navigation = [
     { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -28,47 +31,37 @@ const AdminLayout = () => {
     { name: 'Categories', href: '/admin/categories', icon: Tag },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
     { name: 'Users', href: '/admin/users', icon: Users },
-    { name: 'Reports', href: '/admin/reports', icon: BarChart3 },
-    { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile sidebar overlay */}
-      {isSidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <div className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
-        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:inset-0
-      `}>
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-          <div className="flex items-center space-x-3">
-            <img 
-              src={logoImage} 
-              alt="Mmeraki Logo" 
-              className="h-8 w-auto object-contain"
-            />
-            <h1 className="text-xl font-bold text-gray-900">MMeraki Admin</h1>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-amber-50/30">
+      {/* Header with Logo */}
+      <header className="sticky top-0 z-50 bg-white border-b-2 border-amber-200 shadow-md">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Logo Row */}
+          <div className="flex items-center justify-between h-20 border-b border-gray-100">
+            <div className="flex items-center space-x-4">
+              <img 
+                src={logoImage} 
+                alt="Mmeraki Logo" 
+                className="h-12 w-auto object-contain"
+              />
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
+                MMeraki Admin
+              </h1>
+            </div>
+            <Button
+              variant="outline"
+              className="border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+              onClick={handleLogout}
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="lg:hidden"
-            onClick={() => setIsSidebarOpen(false)}
-          >
-            <X className="w-5 h-5" />
-          </Button>
-        </div>
 
-        <nav className="mt-6 px-3">
-          <div className="space-y-1">
+          {/* Navigation Row */}
+          <nav className="flex items-center space-x-1 py-3 overflow-x-auto">
             {navigation.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -76,64 +69,32 @@ const AdminLayout = () => {
                   key={item.name}
                   to={item.href}
                   className={`
-                    group flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors
+                    flex items-center px-4 py-2.5 text-sm font-semibold rounded-lg transition-all whitespace-nowrap
                     ${isActive
-                      ? 'bg-primary text-white'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                      ? 'bg-gradient-to-r from-amber-500 to-pink-500 text-white shadow-md'
+                      : 'text-gray-700 hover:bg-amber-50 hover:text-amber-700 border-2 border-transparent hover:border-amber-200'
                     }
                   `}
-                  onClick={() => setIsSidebarOpen(false)}
                 >
-                  <item.icon className="mr-3 h-5 w-5" />
+                  <item.icon className="mr-2 h-4 w-4" />
                   {item.name}
                 </Link>
               );
             })}
-          </div>
-        </nav>
-
-        <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
-          <Button
-            variant="ghost"
-            className="w-full justify-start text-gray-700 hover:bg-gray-100"
-            onClick={logout}
-          >
-            <LogOut className="mr-3 h-5 w-5" />
-            Logout
-          </Button>
+          </nav>
         </div>
-      </div>
+      </header>
 
-      {/* Main content */}
-      <div className="lg:pl-64">
-        {/* Top bar */}
-        <div className="sticky top-0 z-30 bg-white border-b border-gray-200">
-          <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden"
-              onClick={() => setIsSidebarOpen(true)}
-            >
-              <Menu className="w-5 h-5" />
-            </Button>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-500">Welcome back, Admin</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Page content */}
-        <main className="p-4 sm:p-6 lg:p-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <Outlet />
-          </motion.div>
-        </main>
-      </div>
+      {/* Main Content - Full Width */}
+      <main className="w-full">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Outlet />
+        </motion.div>
+      </main>
     </div>
   );
 };

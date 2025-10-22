@@ -11,15 +11,22 @@ import EventHighlights from '@/components/EventHighlights';
 import Footer from '@/components/Footer';
 import Banner from '@/components/Banner';
 import EventCard from '@/components/EventCard';
+import TopDecorationsSectionOptimized from '@/components/TopDecorationsSectionOptimized';
 import { getFeaturedEvents, categories } from '@/data/events';
+import { useSessionData } from '@/hooks/useSessionData';
 import heroImage from '@/assets/hero-main.jpg';
 import birthdayImage from '@/assets/birthday-event.jpg';
 import anniversaryImage from '@/assets/anniversary-event.jpg';
 import corporateImage from '@/assets/corporate-event.jpg';
 
 const Home = () => {
-  const featuredEvents = getFeaturedEvents();
   const [currentSlide, setCurrentSlide] = useState(0);
+  
+  // Fetch featured events only once per session
+  const { data: featuredEvents, loading: featuredLoading, error: featuredError } = useSessionData({
+    key: 'home-featured-events',
+    fetchFunction: getFeaturedEvents
+  });
 
   const heroSlides = [
     {
@@ -42,22 +49,9 @@ const Home = () => {
       image: birthdayImage,
       ctaText: "Plan Birthday Party",
       ctaLink: "/birthdays"
-    },
-    {
-      title: "Corporate Events & Team Building",
-      subtitle: "Professional event solutions for your business needs",
-      image: corporateImage,
-      ctaText: "Corporate Solutions",
-      ctaLink: "/corporate"
     }
   ];
 
-  const heroStats = [
-    { icon: <Users className="w-6 h-6" />, value: "1M+", label: "Happy Customers" },
-    { icon: <Calendar className="w-6 h-6" />, value: "50K+", label: "Events Completed" },
-    { icon: <Star className="w-6 h-6" />, value: "4.9", label: "Average Rating" },
-    { icon: <Heart className="w-6 h-6" />, value: "100%", label: "Satisfaction" }
-  ];
 
   // Auto-rotate carousel
   useEffect(() => {
@@ -77,46 +71,18 @@ const Home = () => {
 
   const featuredFrames = [
     {
-      title: 'Birthday Decorations',
+      title: 'Diwali Special',
+      image: 'https://cheetah.cherishx.com/website_layout/1758954399__original_layout_55.jpg?format=avif',
+      link: '/festivals/diwali',
+      color: 'from-violet-500 to-purple-600',
+      icon: <Sparkles className="w-8 h-8" />
+    },
+    {
+      title: 'Birthdays',
       image: birthdayImage,
-      link: '/birthdays/decorations',
+      link: '/birthdays',
       color: 'from-pink-500 to-purple-600',
       icon: <Cake className="w-8 h-8" />
-    },
-    {
-      title: 'Same Day Decorations',
-      image: anniversaryImage,
-      link: '/decorations/same-day',
-      color: 'from-blue-500 to-cyan-600',
-      icon: <Clock className="w-8 h-8" />
-    },
-    {
-      title: 'Kids Birthday Decors',
-      image: birthdayImage,
-      link: '/kids/birthday-decorations',
-      color: 'from-yellow-500 to-orange-600',
-      icon: <Gift className="w-8 h-8" />
-    },
-    {
-      title: 'Corporate Events',
-      image: corporateImage,
-      link: '/corporate',
-      color: 'from-indigo-500 to-purple-600',
-      icon: <Users className="w-8 h-8" />
-    },
-    {
-      title: 'Personalized Gifts',
-      image: anniversaryImage,
-      link: '/gifts/personalized',
-      color: 'from-rose-500 to-pink-600',
-      icon: <Heart className="w-8 h-8" />
-    },
-    {
-      title: 'Candlelight Dinner',
-      image: anniversaryImage,
-      link: '/candlelight',
-      color: 'from-amber-500 to-yellow-600',
-      icon: <Sparkles className="w-8 h-8" />
     },
     {
       title: 'Baby Shower',
@@ -126,6 +92,13 @@ const Home = () => {
       icon: <Gift className="w-8 h-8" />
     },
     {
+      title: 'Candlelight Dinners',
+      image: anniversaryImage,
+      link: '/candlelight',
+      color: 'from-amber-500 to-yellow-600',
+      icon: <Sparkles className="w-8 h-8" />
+    },
+    {
       title: 'Baby Welcome',
       image: anniversaryImage,
       link: '/kids/welcome-baby',
@@ -133,18 +106,25 @@ const Home = () => {
       icon: <Heart className="w-8 h-8" />
     },
     {
-      title: 'Festive Celebrations',
+      title: 'House Warming',
       image: anniversaryImage,
-      link: '/festivals',
-      color: 'from-violet-500 to-purple-600',
+      link: '/decorations/house-warming',
+      color: 'from-orange-500 to-red-600',
+      icon: <Gift className="w-8 h-8" />
+    },
+    {
+      title: 'Haldi/Mehandi',
+      image: anniversaryImage,
+      link: '/anniversary/haldi-mehandi',
+      color: 'from-rose-500 to-pink-600',
       icon: <Sparkles className="w-8 h-8" />
     },
     {
-      title: 'Games & Activities',
-      image: birthdayImage,
-      link: '/activities',
-      color: 'from-orange-500 to-red-600',
-      icon: <Gift className="w-8 h-8" />
+      title: 'Wedding Anniversary',
+      image: anniversaryImage,
+      link: '/anniversary',
+      color: 'from-indigo-500 to-purple-600',
+      icon: <Heart className="w-8 h-8" />
     }
   ];
 
@@ -220,13 +200,36 @@ const Home = () => {
     }
   ];
 
+  const sectionGradients = [
+    'bg-gradient-to-r from-pink-50 via-rose-100 to-pink-50',
+    'bg-gradient-to-r from-gray-900 via-black to-gray-900',
+    'bg-gradient-to-r from-green-50 via-emerald-100 to-green-50',
+    'bg-gradient-to-r from-pink-50 via-fuchsia-100 to-pink-50'
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <OccasionNav />
       
-      {/* Hero Carousel */}
-      <section className="relative h-[70vh] overflow-hidden">
+      {/* Loading indicator for featured events */}
+      {featuredLoading && (
+        <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mx-4 mt-4 rounded-r-lg">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <Clock className="h-5 w-5 text-blue-400 animate-spin" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-blue-700">
+                Loading featured events...
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {/* Hero Section */}
+      <section className="relative h-[50vh] overflow-hidden">
         <div className="relative w-full h-full">
           {heroSlides.map((slide, index) => (
             <motion.div
@@ -239,104 +242,17 @@ const Home = () => {
               transition={{ duration: 0.8 }}
             >
               <div
-                className="w-full h-full bg-cover bg-center bg-no-repeat"
+                className="w-full h-full bg-cover bg-center bg-no-repeat rounded-3xl"
                 style={{ backgroundImage: `url(${slide.image})` }}
-              >
-                <div className="absolute inset-0 bg-black/40" />
-                <div className="relative z-10 flex items-center justify-center h-full">
-                  <div className="text-center text-white max-w-4xl mx-auto px-4">
-                    <motion.h1
-                      className="text-4xl md:text-6xl font-bold mb-6"
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.8, delay: 0.2 }}
-                    >
-                      {slide.title}
-                    </motion.h1>
-                    <motion.p
-                      className="text-xl md:text-2xl mb-8 text-gray-200"
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.8, delay: 0.4 }}
-                    >
-                      {slide.subtitle}
-                    </motion.p>
-                    <motion.div
-                      initial={{ opacity: 0, y: 30 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.8, delay: 0.6 }}
-                    >
-                      <Button
-                        size="lg"
-                        className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg rounded-full"
-                        asChild
-                      >
-                        <Link to={slide.ctaLink}>
-                          {slide.ctaText}
-                          <ArrowRight className="ml-2 w-5 h-5" />
-                        </Link>
-                      </Button>
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
+              />
             </motion.div>
           ))}
-        </div>
-
-        {/* Carousel Controls */}
-        <button
-          onClick={prevSlide}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all"
-        >
-          <ChevronLeft className="w-6 h-6" />
-        </button>
-        <button
-          onClick={nextSlide}
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-all"
-        >
-          <ChevronRight className="w-6 h-6" />
-        </button>
-
-        {/* Carousel Indicators */}
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          {heroSlides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all ${
-                index === currentSlide ? 'bg-white' : 'bg-white/50'
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* Stats Overlay */}
-        <div className="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {heroStats.map((stat, index) => (
-                <motion.div
-                  key={index}
-                  className="text-center"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.8 + index * 0.1 }}
-                >
-                  <div className="flex justify-center mb-2 text-primary">
-                    {stat.icon}
-                  </div>
-                  <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                  <div className="text-sm text-gray-600">{stat.label}</div>
-                </motion.div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
       {/* Featured Frames */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-white relative overflow-hidden rounded-2xl">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#D4AF37]/40 to-transparent" />
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -352,36 +268,35 @@ const Home = () => {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-            {featuredFrames.map((frame, index) => (
+        </div>
+
+        {/* Full-bleed grid */}
+        <div className="w-screen relative left-1/2 -translate-x-1/2">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-2 md:gap-4 px-4 md:px-6 lg:px-8">
+            {featuredFrames.slice(0, 8).map((frame, index) => (
               <motion.div
                 key={frame.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: index * 0.1 }}
-                whileHover={{ y: -5, scale: 1.05 }}
-                className="group"
               >
                 <Link to={frame.link}>
-                  <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 shadow-sm h-48">
+                  <Card className="overflow-hidden border-0 shadow-sm aspect-square">
                     <div className="relative h-full">
                       <img
                         src={frame.image}
                         alt={frame.title}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        className="w-full h-full object-cover"
                       />
-                      <div className={`absolute inset-0 bg-gradient-to-t ${frame.color} opacity-80 group-hover:opacity-90 transition-opacity`} />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-white p-4">
-                        <div className="mb-2 group-hover:scale-110 transition-transform duration-300">
-                          {frame.icon}
-                        </div>
-                        <h3 className="text-sm md:text-base font-semibold text-center group-hover:text-white transition-colors">
-                          {frame.title}
-                        </h3>
-                      </div>
+                      {/* Remove gradient overlay to keep image fully visible */}
+                      <div className={`absolute inset-0 bg-transparent`} />
+                      {/* Overlay content removed as per request (no icon or title) */}
                     </div>
                   </Card>
                 </Link>
+                <h3 className="mt-3 text-base md:text-lg font-bold text-center text-black">
+                  {frame.title}
+                </h3>
               </motion.div>
             ))}
           </div>
@@ -389,6 +304,122 @@ const Home = () => {
       </section>
 
       {/* Spotlight Section - Trending Experiences */}
+      {/* Secondary Banner */}
+      <section className="py-12">
+        <div className="w-screen relative left-1/2 -translate-x-1/2 px-4 md:px-6 lg:px-8">
+          <div className="rounded-3xl overflow-hidden">
+            <Banner
+              title="Celebrate Every Moment"
+              subtitle="Discover curated decorations and experiences for every occasion"
+              backgroundImage={heroImage}
+              ctaText="Explore Packages"
+              ctaLink="/experiences"
+              className="relative h-64 md:h-80 rounded-3xl overflow-hidden"
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Top Decorations Sections with Real Data */}
+      <React.Fragment>
+        {/* Top Decorations 1 - Birthdays */}
+        <TopDecorationsSectionOptimized
+          sectionNumber={1}
+          category="birthdays"
+          subcategories={[
+            "Birthday Decorations",
+            "Birthday Decors for Him",
+            "Birthday Decors for Her",
+            "1st Birthday Decorations",
+            "18th Birthday Special",
+            "Car Boot Decorations",
+            "Terrace Decorations",
+            "Rosegold Themed Decorations",
+            "Kids Themed Decorations"
+          ]}
+          title="Top Decorations 1 - Birthday Celebrations"
+          gradientClass="bg-gradient-to-r from-pink-50 via-rose-50 to-pink-50"
+          textColor="text-gray-900"
+        />
+        
+        {/* Banner between sections */}
+        <div className="h-[2px] bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37] to-[#D4AF37]/0 w-screen relative left-1/2 -translate-x-1/2" />
+        <section className="py-10">
+          <div className="w-screen relative left-1/2 -translate-x-1/2 px-4 md:px-6 lg:px-8">
+            <div className="rounded-3xl overflow-hidden">
+              <Banner
+                title="Bring Your Vision To Life"
+                subtitle="Handpicked decor themes for every celebration"
+                backgroundImage={heroImage}
+                ctaText="Explore Themes"
+                ctaLink="/experiences"
+                className="relative h-56 md:h-72 rounded-3xl overflow-hidden"
+              />
+            </div>
+          </div>
+        </section>
+        
+        {/* Top Decorations 2 - Anniversary */}
+        <TopDecorationsSectionOptimized
+          sectionNumber={2}
+          category="anniversary"
+          title="Top Decorations 2 - Anniversary Celebrations"
+          gradientClass="bg-gradient-to-r from-purple-600 via-purple-700 to-amber-600"
+          textColor="text-white"
+        />
+        
+        {/* Banner between sections */}
+        <div className="h-[2px] bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37] to-[#D4AF37]/0 w-screen relative left-1/2 -translate-x-1/2" />
+        <section className="py-10">
+          <div className="w-screen relative left-1/2 -translate-x-1/2 px-4 md:px-6 lg:px-8">
+            <div className="rounded-3xl overflow-hidden">
+              <Banner
+                title="Bring Your Vision To Life"
+                subtitle="Handpicked decor themes for every celebration"
+                backgroundImage={heroImage}
+                ctaText="Explore Themes"
+                ctaLink="/experiences"
+                className="relative h-56 md:h-72 rounded-3xl overflow-hidden"
+              />
+            </div>
+          </div>
+        </section>
+        
+        {/* Top Decorations 3 - Kids Celebrations */}
+        <TopDecorationsSectionOptimized
+          sectionNumber={3}
+          category="kids"
+          title="Top Decorations 3 - Kids Celebrations"
+          gradientClass="bg-gradient-to-r from-blue-50 via-sky-50 to-blue-50"
+          textColor="text-gray-900"
+        />
+        
+        {/* Banner between sections */}
+        <div className="h-[2px] bg-gradient-to-r from-[#D4AF37]/0 via-[#D4AF37] to-[#D4AF37]/0 w-screen relative left-1/2 -translate-x-1/2" />
+        <section className="py-10">
+          <div className="w-screen relative left-1/2 -translate-x-1/2 px-4 md:px-6 lg:px-8">
+            <div className="rounded-3xl overflow-hidden">
+              <Banner
+                title="Bring Your Vision To Life"
+                subtitle="Handpicked decor themes for every celebration"
+                backgroundImage={heroImage}
+                ctaText="Explore Themes"
+                ctaLink="/experiences"
+                className="relative h-56 md:h-72 rounded-3xl overflow-hidden"
+              />
+            </div>
+          </div>
+        </section>
+        
+        {/* Top Decorations 4 - Festivals */}
+        <TopDecorationsSectionOptimized
+          sectionNumber={4}
+          category="festivals"
+          title="Top Decorations 4 - Festival Celebrations"
+          gradientClass="bg-gradient-to-r from-green-50 via-emerald-50 to-green-50"
+          textColor="text-gray-900"
+        />
+      </React.Fragment>
       <section className="py-16 bg-gray-50">
         <div className="container mx-auto px-4">
           <motion.div
@@ -452,11 +483,8 @@ const Home = () => {
                         </div>
                         <Button 
                           className="w-full bg-primary hover:bg-primary/90 text-white"
-                          asChild
                         >
-                          <Link to={`/event/${experience.link.split('/').pop()}`}>
-                            Book Now
-                          </Link>
+                          Book Now
                         </Button>
                       </CardContent>
                     </Card>
@@ -579,7 +607,7 @@ const Home = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-primary">
+        <section className="py-16 bg-gradient-to-r from-purple-600 via-purple-700 to-amber-600">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -595,7 +623,7 @@ const Home = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button 
                 size="lg" 
-                className="bg-white text-primary hover:bg-gray-100 rounded-full px-8 py-3"
+                className="bg-black text-amber-400 hover:bg-gray-800 rounded-full px-8 py-3"
                 asChild
               >
                 <Link to="/contact">
@@ -606,7 +634,7 @@ const Home = () => {
               <Button 
                 size="lg" 
                 variant="outline" 
-                className="border-white text-white hover:bg-white hover:text-primary rounded-full px-8 py-3"
+                className="border-black text-black bg-transparent hover:bg-black hover:text-amber-400 rounded-full px-8 py-3"
                 asChild
               >
                 <Link to="/experiences">

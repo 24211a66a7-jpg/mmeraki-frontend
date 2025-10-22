@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -26,9 +26,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import Navbar from '@/components/Navbar';
-import OccasionNav from '@/components/OccasionNav';
-import Footer from '@/components/Footer';
+// Removed Navbar, OccasionNav, and Footer for cleaner checkout experience
+import { useCart } from '@/context/CartContext';
+import { api } from '@/lib/api';
 import birthdayImage from '@/assets/birthday-event.jpg';
 import anniversaryImage from '@/assets/anniversary-event.jpg';
 import corporateImage from '@/assets/corporate-event.jpg';
@@ -37,7 +37,22 @@ const Checkout = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [paymentMethod, setPaymentMethod] = useState('card');
+  const [selectedDate, setSelectedDate] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
+  const { items, refreshCart } = useCart();
+
+  const orderItems = useMemo(() => items.map(i => ({
+    id: i.id,
+    title: i.title,
+    category: i.category,
+    price: i.base_price,
+    quantity: i.quantity ?? 1,
+    image: i.thumbnail_url || birthdayImage,
+    date: (i as any).selected_date,
+    time: (i as any).selected_time,
+    location: 'Delhi NCR'
+  })), [items]);
 
   // Form states
   const [customerInfo, setCustomerInfo] = useState({
@@ -58,41 +73,57 @@ const Checkout = () => {
     cardName: ''
   });
 
-  // Mock order data
-  const orderItems = [
-    {
-      id: '1',
-      title: 'Rosegold Birthday Surprise',
-      category: 'Birthday',
-      price: 2999,
-      quantity: 1,
-      image: birthdayImage,
-      date: '2024-01-20',
-      time: '2:00 PM',
-      location: 'Delhi NCR'
-    },
-    {
-      id: '2',
-      title: 'Romantic Anniversary Dinner',
-      category: 'Anniversary',
-      price: 2499,
-      quantity: 1,
-      image: anniversaryImage,
-      date: '2024-01-22',
-      time: '7:00 PM',
-      location: 'Delhi NCR'
+  useEffect(() => {
+    if (items.length === 0) {
+      navigate('/cart');
     }
-  ];
+  }, [items, navigate]);
 
-  const subtotal = orderItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const serviceFee = subtotal * 0.05; // 5% service fee
-  const total = subtotal + serviceFee;
+  const subtotal = useMemo(() => orderItems.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0), [orderItems]);
+  const serviceFee = useMemo(() => subtotal * 0.05, [subtotal]); // 5%
+  const total = useMemo(() => subtotal + serviceFee, [subtotal, serviceFee]);
 
   const steps = [
     { id: 1, title: 'Customer Details', description: 'Your information' },
     { id: 2, title: 'Payment', description: 'Payment method' },
     { id: 3, title: 'Confirmation', description: 'Order summary' }
   ];
+
+  // Admin WhatsApp number with normalization (auto-add 91 if 10 digits)
+  const rawWhatsApp = (import.meta as any)?.env?.VITE_ADMIN_WHATSAPP || '9182591431';
+  const adminWhatsApp = (() => {
+    const digits = String(rawWhatsApp).replace(/\D/g, '');
+    return digits.length === 10 ? `91${digits}` : digits; // assume India if 10 digits
+  })();
+
+  const sendWhatsAppToAdmin = () => {
+    try {
+      const itemsText = orderItems
+        .map((it, idx) => `${idx + 1}. ${it.title} x${it.quantity} - ₹${(it.price || 0).toLocaleString()}${it.date ? `, ${it.date}` : ''}${it.time ? ` ${it.time}` : ''}`)
+        .join('\n');
+      const text = [
+        `New Order Received ✅`,
+        `Name: ${customerInfo.firstName} ${customerInfo.lastName}`.trim(),
+        `Phone: ${customerInfo.phone}`,
+        `Email: ${customerInfo.email}`,
+        `Address: ${customerInfo.address}, ${customerInfo.city} ${customerInfo.pincode}, ${customerInfo.state}`,
+        `Date: ${selectedDate || 'N/A'}`,
+        `Time: ${selectedTime || 'N/A'}`,
+        `Payment: ${paymentMethod.toUpperCase()}`,
+        `\nItems:\n${itemsText}`,
+        `\nSubtotal: ₹${subtotal.toLocaleString()}`,
+        `Service Fee: ₹${serviceFee.toLocaleString()}`,
+        `Total: ₹${total.toLocaleString()}`
+      ].join('\n');
+
+      const url = `https://wa.me/${adminWhatsApp}?text=${encodeURIComponent(text)}`;
+      if (typeof window !== 'undefined') {
+        window.open(url, '_blank');
+      }
+    } catch (_) {
+      // no-op if WhatsApp open fails
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     setCustomerInfo(prev => ({ ...prev, [field]: value }));
@@ -116,10 +147,26 @@ const Checkout = () => {
 
   const handlePayment = async () => {
     setIsProcessing(true);
-    // Simulate payment processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    setIsProcessing(false);
-    setCurrentStep(3);
+    try {
+      const data = await api.post<any>('/orders', {
+        customer: customerInfo,
+        paymentMethod,
+        selectedDate,
+        selectedTime
+      });
+      if (!data || data.error) {
+        throw new Error(data?.message || 'Failed to place order');
+      }
+      setIsProcessing(false);
+      setCurrentStep(3);
+      // Send WhatsApp notification to admin with order details
+      sendWhatsAppToAdmin();
+      // Ensure cart reflects backend clear
+      try { await refreshCart(); } catch {}
+    } catch (e) {
+      setIsProcessing(false);
+      alert((e as any).message || 'Failed to place order');
+    }
   };
 
   const isStep1Valid = customerInfo.firstName && customerInfo.lastName && 
@@ -133,19 +180,23 @@ const Checkout = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <Navbar />
-      <OccasionNav />
-      
+      {/* Clean checkout page without navigation distractions */}
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
-          <Button variant="ghost" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
-            <p className="text-gray-600">Complete your event booking</p>
+        {/* Simple Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <Button variant="ghost" onClick={() => navigate(-1)}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">Checkout</h1>
+              <p className="text-gray-600">Complete your event booking</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2 text-sm text-gray-500">
+            <Shield className="w-4 h-4" />
+            <span>Secure checkout</span>
           </div>
         </div>
 
@@ -312,6 +363,27 @@ const Checkout = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-6">
+                    {/* Date & Time selection for the order */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="sel-date">Event Date *</Label>
+                        <Input
+                          id="sel-date"
+                          type="date"
+                          value={selectedDate}
+                          onChange={(e) => setSelectedDate(e.target.value)}
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="sel-time">Time Slot *</Label>
+                        <Input
+                          id="sel-time"
+                          type="time"
+                          value={selectedTime}
+                          onChange={(e) => setSelectedTime(e.target.value)}
+                        />
+                      </div>
+                    </div>
                     <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
                       <div className="space-y-4">
                         <div className="flex items-center space-x-3 p-4 border rounded-lg">
@@ -401,7 +473,7 @@ const Checkout = () => {
                       </Button>
                       <Button 
                         onClick={handlePayment}
-                        disabled={!isStep2Valid || isProcessing}
+                        disabled={!isStep2Valid || isProcessing || !selectedDate || !selectedTime}
                         className="bg-primary hover:bg-primary/90"
                       >
                         {isProcessing ? 'Processing...' : 'Complete Payment'}
@@ -477,7 +549,7 @@ const Checkout = () => {
                         <p className="text-xs text-gray-600">{item.category}</p>
                         <div className="flex items-center text-xs text-gray-500 mt-1">
                           <Calendar className="w-3 h-3 mr-1" />
-                          <span>{item.date} at {item.time}</span>
+                          <span>{item.date || 'N/A'}{item.time ? ` at ${item.time}` : ''}</span>
                         </div>
                         <div className="flex items-center text-xs text-gray-500">
                           <MapPin className="w-3 h-3 mr-1" />
@@ -552,8 +624,6 @@ const Checkout = () => {
           </div>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 };

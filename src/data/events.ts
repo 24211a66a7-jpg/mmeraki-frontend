@@ -1,11 +1,33 @@
+// Backend API types (matching the backend Experience interface)
+export interface Experience {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  subcategory?: string;
+  short_desc?: string;
+  description?: string;
+  base_price?: number;
+  images?: string[];
+  thumbnail_url?: string;
+  template_type?: 'standard' | 'special';
+  is_featured?: boolean;
+  created_at?: string;
+}
+
+// Frontend Event interface (for compatibility with existing components)
 export interface Event {
   id: string;
   title: string;
+  slug: string; // Add slug field
   category: string;
   price: string;
   originalPrice?: string;
   image: string;
+  images?: string[];
   description: string;
+  shortDesc?: string;
+  basePrice?: number;
   rating: number;
   reviews: number;
   duration: string;
@@ -16,245 +38,306 @@ export interface Event {
   isNew?: boolean;
 }
 
-export const events: Event[] = [
-  {
-    id: '1',
-    title: 'Romantic Anniversary Dinner',
-    category: 'Anniversary',
-    price: '₹2,999',
-    originalPrice: '₹3,999',
-    image: '/src/assets/anniversary-event.jpg',
-    description: 'A beautifully crafted intimate dinner experience with candlelight, premium decorations, and personalized touches.',
-    rating: 4.9,
-    reviews: 127,
-    duration: '3 hours',
-    capacity: '2-4 people',
-    location: 'Your chosen venue or our premium locations',
-    features: ['Professional event setup', 'Premium decorations', 'Photography moments', 'Personalized touches'],
-    isPopular: true
-  },
-  {
-    id: '2',
-    title: 'Birthday Surprise Party',
-    category: 'Birthday',
-    price: '₹1,999',
-    image: '/src/assets/birthday-event.jpg',
-    description: 'Make birthdays unforgettable with our surprise party packages including decorations, cake, and entertainment.',
-    rating: 4.8,
-    reviews: 89,
-    duration: '4 hours',
-    capacity: '10-20 people',
-    location: 'Home or venue of choice',
-    features: ['Surprise setup', 'Birthday decorations', 'Cake arrangement', 'Entertainment'],
-    isNew: true
-  },
-  {
-    id: '3',
-    title: 'Corporate Networking Event',
-    category: 'Corporate',
-    price: '₹4,999',
-    image: '/src/assets/corporate-event.jpg',
-    description: 'Professional networking experience with premium catering, elegant setup, and structured networking activities.',
-    rating: 4.7,
-    reviews: 34,
-    duration: '4 hours',
-    capacity: '50-100 people',
-    location: 'Premium corporate venues',
-    features: ['Premium catering', 'Professional photography', 'Networking activities', 'Executive setup']
-  },
-  {
-    id: '4',
-    title: 'Candlelight Dinner Setup',
-    category: 'Candlelight',
-    price: '₹2,499',
-    originalPrice: '₹3,199',
-    image: '/src/assets/anniversary-event.jpg',
-    description: 'Intimate candlelight dinner with romantic ambiance, premium table setting, and personalized service.',
-    rating: 4.9,
-    reviews: 156,
-    duration: '2 hours',
-    capacity: '2 people',
-    location: 'Your home or romantic venue',
-    features: ['Candlelight setup', 'Premium table setting', 'Romantic music', 'Personalized service'],
-    isPopular: true
-  },
-  {
-    id: '5',
-    title: 'Kids Birthday Celebration',
-    category: 'Kids',
-    price: '₹1,499',
-    image: '/src/assets/birthday-event.jpg',
-    description: 'Fun-filled kids birthday party with themed decorations, games, and entertainment for the little ones.',
-    rating: 4.8,
-    reviews: 67,
-    duration: '3 hours',
-    capacity: '8-15 kids',
-    location: 'Home or party venue',
-    features: ['Themed decorations', 'Party games', 'Entertainment', 'Kids-friendly setup']
-  },
-  {
-    id: '6',
-    title: 'Festival Decoration Package',
-    category: 'Festivals',
-    price: '₹3,499',
-    image: '/src/assets/anniversary-event.jpg',
-    description: 'Complete festival decoration package with traditional and modern elements for your celebrations.',
-    rating: 4.6,
-    reviews: 45,
-    duration: '6 hours',
-    capacity: '20-50 people',
-    location: 'Your venue',
-    features: ['Traditional decorations', 'Modern elements', 'Lighting setup', 'Cultural touches']
-  },
-  {
-    id: '7',
-    title: 'Personalized Gift Experience',
-    category: 'Gifts',
-    price: '₹999',
-    image: '/src/assets/birthday-event.jpg',
-    description: 'Curated personalized gift experience with custom packaging and delivery for special occasions.',
-    rating: 4.7,
-    reviews: 123,
-    duration: '1 hour',
-    capacity: '1 person',
-    location: 'Delivery to address',
-    features: ['Personalized gifts', 'Custom packaging', 'Special delivery', 'Surprise element']
-  },
-  {
-    id: '8',
-    title: 'Baby Shower Celebration',
-    category: 'Kids',
-    price: '₹2,199',
-    image: '/src/assets/corporate-event.jpg',
-    description: 'Beautiful baby shower setup with elegant decorations, games, and memorable moments for the expecting parents.',
-    rating: 4.8,
-    reviews: 78,
-    duration: '4 hours',
-    capacity: '15-25 people',
-    location: 'Home or venue',
-    features: ['Elegant decorations', 'Baby shower games', 'Memory moments', 'Gift presentation']
-  },
-  {
-    id: '9',
-    title: 'Proposal Setup',
-    category: 'Anniversary',
-    price: '₹3,999',
-    image: '/src/assets/anniversary-event.jpg',
-    description: 'Perfect proposal setup with romantic ambiance, photography, and all the special touches for your big moment.',
-    rating: 4.9,
-    reviews: 89,
-    duration: '2 hours',
-    capacity: '2 people',
-    location: 'Romantic venue of choice',
-    features: ['Romantic setup', 'Professional photography', 'Ring presentation', 'Memory creation'],
-    isPopular: true
-  },
-  {
-    id: '10',
-    title: 'Team Building Retreat',
-    category: 'Corporate',
-    price: '₹2,999',
-    image: '/src/assets/corporate-event.jpg',
-    description: 'Comprehensive team building experience with activities, workshops, and collaborative exercises.',
-    rating: 4.7,
-    reviews: 56,
-    duration: '6 hours',
-    capacity: '20-50 people',
-    location: 'Outdoor or indoor venue',
-    features: ['Team activities', 'Professional facilitator', 'Lunch & refreshments', 'Activity materials']
-  },
-  {
-    id: '11',
-    title: 'Valentine\'s Day Special',
-    category: 'Anniversary',
-    price: '₹3,499',
-    originalPrice: '₹4,499',
-    image: '/src/assets/anniversary-event.jpg',
-    description: 'Special Valentine\'s Day package with romantic dinner, decorations, and personalized surprises.',
-    rating: 4.9,
-    reviews: 134,
-    duration: '3 hours',
-    capacity: '2 people',
-    location: 'Romantic venue',
-    features: ['Romantic dinner', 'Valentine decorations', 'Personalized surprises', 'Memory moments']
-  },
-  {
-    id: '12',
-    title: 'Graduation Celebration',
-    category: 'Festivals',
-    price: '₹1,799',
-    image: '/src/assets/birthday-event.jpg',
-    description: 'Celebrate academic achievements with our graduation party package including decorations and entertainment.',
-    rating: 4.6,
-    reviews: 42,
-    duration: '4 hours',
-    capacity: '15-30 people',
-    location: 'Home or venue',
-    features: ['Graduation decorations', 'Achievement celebration', 'Entertainment', 'Memory book']
-  },
-  {
-    id: '13',
-    title: 'Housewarming Party',
-    category: 'Festivals',
-    price: '₹2,299',
-    image: '/src/assets/corporate-event.jpg',
-    description: 'Warm welcome to your new home with our housewarming party package including decorations and catering.',
-    rating: 4.7,
-    reviews: 63,
-    duration: '5 hours',
-    capacity: '20-40 people',
-    location: 'New home',
-    features: ['Welcome decorations', 'Catering setup', 'House blessing', 'Gift presentation']
-  },
-  {
-    id: '14',
-    title: 'Retirement Celebration',
-    category: 'Corporate',
-    price: '₹3,799',
-    image: '/src/assets/corporate-event.jpg',
-    description: 'Honor years of service with our retirement celebration package including speeches and memories.',
-    rating: 4.8,
-    reviews: 28,
-    duration: '4 hours',
-    capacity: '30-60 people',
-    location: 'Office or venue',
-    features: ['Honor ceremony', 'Memory presentation', 'Catering', 'Gift ceremony']
-  },
-  {
-    id: '15',
-    title: 'New Year Party',
-    category: 'Festivals',
-    price: '₹4,499',
-    image: '/src/assets/anniversary-event.jpg',
-    description: 'Ring in the new year with our spectacular New Year party package including decorations and entertainment.',
-    rating: 4.8,
-    reviews: 91,
-    duration: '6 hours',
-    capacity: '25-50 people',
-    location: 'Venue of choice',
-    features: ['New Year decorations', 'Countdown setup', 'Entertainment', 'Midnight celebration']
+// API Response types
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  count?: number;
+  error?: string;
+  message?: string;
+}
+
+// API Configuration
+import { api } from '@/lib/api';
+const API_BASE_URL = (import.meta as any)?.env?.VITE_API_URL || 'https://mmeraki-backend1.vercel.app/api';
+
+// Cache for storing fetched data
+let experiencesCache: Experience[] | null = null;
+let lastFetchTime = 0;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Utility function to convert Experience to Event format
+const convertExperienceToEvent = (experience: Experience): Event => {
+  return {
+    id: experience.id,
+    title: experience.title,
+    slug: experience.slug, // Add slug to the Event interface
+    category: experience.category,
+    price: experience.base_price ? `₹${experience.base_price.toLocaleString()}` : '₹0',
+    originalPrice: experience.base_price && experience.base_price > 1000 ? `₹${(experience.base_price * 1.3).toLocaleString()}` : undefined,
+    image: experience.thumbnail_url || experience.images?.[0] || '/src/assets/anniversary-event.jpg',
+    images: experience.images || [],
+    description: experience.description || experience.short_desc || '',
+    shortDesc: experience.short_desc || '',
+    basePrice: experience.base_price,
+    rating: 4.5 + Math.random() * 0.5, // Mock rating between 4.5-5.0
+    reviews: Math.floor(Math.random() * 200) + 20, // Mock reviews between 20-220
+    duration: getMockDuration(experience.category),
+    capacity: getMockCapacity(experience.category),
+    location: 'Delhi NCR',
+    features: getMockFeatures(experience.category),
+    isPopular: experience.is_featured || false,
+    isNew: experience.template_type === 'special' || false
+  };
+};
+
+// Helper functions for mock data
+const getMockDuration = (category: string): string => {
+  const durations: Record<string, string> = {
+    'anniversary': '3 hours',
+    'birthday': '4 hours',
+    'corporate': '6 hours',
+    'kids': '3 hours',
+    'festival': '6 hours',
+    'celebration': '4 hours'
+  };
+  return durations[category.toLowerCase()] || '4 hours';
+};
+
+const getMockCapacity = (category: string): string => {
+  const capacities: Record<string, string> = {
+    'anniversary': '2-4 people',
+    'birthday': '10-20 people',
+    'corporate': '20-50 people',
+    'kids': '8-15 kids',
+    'festival': '20-50 people',
+    'celebration': '15-30 people'
+  };
+  return capacities[category.toLowerCase()] || '10-20 people';
+};
+
+const getMockFeatures = (category: string): string[] => {
+  const features: Record<string, string[]> = {
+    'anniversary': ['Romantic setup', 'Premium decorations', 'Photography', 'Personalized touches'],
+    'birthday': ['Party decorations', 'Cake setup', 'Entertainment', 'Surprise elements'],
+    'corporate': ['Professional setup', 'Catering', 'Networking activities', 'Executive service'],
+    'kids': ['Themed decorations', 'Party games', 'Entertainment', 'Kids-friendly setup'],
+    'festival': ['Traditional decorations', 'Cultural elements', 'Lighting setup', 'Celebration touches'],
+    'celebration': ['Special decorations', 'Entertainment', 'Memory moments', 'Gift presentation']
+  };
+  return features[category.toLowerCase()] || ['Professional setup', 'Quality service', 'Memorable experience'];
+};
+
+// API Functions
+const fetchExperiences = async (): Promise<Experience[]> => {
+  try {
+    const result: ApiResponse<Experience[]> = await api.get(`/experiences`);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to fetch experiences');
+    }
+    return result.data;
+  } catch (error) {
+    // Swallow errors to avoid noisy console logs in production
+    throw error;
   }
-];
+};
 
+const fetchExperiencesWithCache = async (): Promise<Experience[]> => {
+  const now = Date.now();
+  
+  // Return cached data if still valid
+  if (experiencesCache && (now - lastFetchTime) < CACHE_DURATION) {
+    return experiencesCache;
+  }
+  
+  // Fetch fresh data
+  try {
+    const experiences = await fetchExperiences();
+    experiencesCache = experiences;
+    lastFetchTime = now;
+    return experiences;
+  } catch (error) {
+    // If fetch fails and we have cached data, return it
+    if (experiencesCache) {
+      // Using cached data due to fetch error
+      return experiencesCache;
+    }
+    throw error;
+  }
+};
+
+// Public API functions
+export const getExperiences = async (): Promise<Event[]> => {
+  try {
+    const experiences = await fetchExperiencesWithCache();
+    return experiences.map(convertExperienceToEvent);
+  } catch (error) {
+    // noop
+    // Return empty array as fallback
+    return [];
+  }
+};
+
+export const getExperiencesByCategory = async (category: string): Promise<Event[]> => {
+  try {
+    const experiences = await fetchExperiencesWithCache();
+    const normalize = (s: string) => s.trim().toLowerCase();
+    const requested = normalize(category);
+    const synonyms: Record<string, string[]> = {
+      birthdays: ['birthdays', 'birthday'],
+      festivals: ['festivals', 'festival'],
+      anniversary: ['anniversary', 'anniversaries'],
+      candlelight: ['candlelight', 'candlelight dinners', 'candlelight-dinners'],
+      decorations: ['decorations', 'decoration'],
+      kids: ['kids', 'kid', 'children'],
+      corporate: ['corporate', 'corporate events', 'corporate-event', 'corporate-events'],
+      gifts: ['gifts', 'gift']
+    };
+    const accepted = synonyms[requested] || [requested];
+    const filteredExperiences = experiences.filter((exp) => accepted.includes(normalize(exp.category)));
+    return filteredExperiences.map(convertExperienceToEvent);
+  } catch (error) {
+    // noop
+    return [];
+  }
+};
+
+export const getExperiencesBySubcategory = async (subcategory: string): Promise<Event[]> => {
+  try {
+    const result: ApiResponse<Experience[]> = await api.get(`/experiences`, { subcategory: encodeURIComponent(subcategory) });
+    
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to fetch experiences by subcategory');
+    }
+    return result.data.map(convertExperienceToEvent);
+  } catch (error) {
+    return [];
+  }
+};
+
+export const getExperiencesBySubcategories = async (subcategories: string[]): Promise<Event[]> => {
+  try {
+    const allEvents: Event[] = [];
+    
+    // Add delay between requests to avoid rate limiting
+    for (let i = 0; i < subcategories.length; i++) {
+      const subcategory = subcategories[i];
+      try {
+        const events = await getExperiencesBySubcategory(subcategory);
+        allEvents.push(...events);
+        
+        // Add small delay between requests to avoid rate limiting
+        if (i < subcategories.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      } catch (error) {
+        // Continue with other subcategories even if one fails
+        continue;
+      }
+    }
+    
+    // Remove duplicates based on event ID
+    const uniqueEvents = allEvents.filter((event, index, self) => 
+      index === self.findIndex(e => e.id === event.id)
+    );
+    
+    return uniqueEvents;
+  } catch (error) {
+    return [];
+  }
+};
+
+export const getExperiencesByCategoryAndSubcategory = async (category: string, subcategory?: string): Promise<Event[]> => {
+  try {
+    // If subcategory is provided, filter by subcategory (which is more specific)
+    if (subcategory) {
+      return await getExperiencesBySubcategory(subcategory);
+    }
+    // Otherwise, filter by category
+    return await getExperiencesByCategory(category);
+  } catch (error) {
+    // noop
+    return [];
+  }
+};
+
+export const getFeaturedExperiences = async (): Promise<Event[]> => {
+  try {
+    const result: ApiResponse<Experience[]> = await api.get(`/experiences/featured`);
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to fetch featured experiences');
+    }
+    return result.data.map(convertExperienceToEvent);
+  } catch (error) {
+    // noop
+    return [];
+  }
+};
+
+export const getExperienceBySlug = async (slug: string): Promise<Event | null> => {
+  try {
+    const result: ApiResponse<Experience> = await api.get(`/experiences/${slug}`);
+    if (!result.success) {
+      return null;
+    }
+    return convertExperienceToEvent(result.data);
+  } catch (error) {
+    // noop
+    // Fallback: try to find by slug in cached data
+    try {
+      const experiences = await fetchExperiencesWithCache();
+      const experience = experiences.find(exp => exp.slug === slug);
+      return experience ? convertExperienceToEvent(experience) : null;
+    } catch (fallbackError) {
+      // noop
+      return null;
+    }
+  }
+};
+
+export const searchExperiences = async (query: string): Promise<Event[]> => {
+  try {
+    const result: ApiResponse<Experience[]> = await api.get(`/experiences/search`, { q: encodeURIComponent(query) });
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to search experiences');
+    }
+    return result.data.map(convertExperienceToEvent);
+  } catch (error) {
+    // noop
+    return [];
+  }
+};
+
+// Legacy functions for backward compatibility
+export const getEventsByCategory = getExperiencesByCategory;
+export const getFeaturedEvents = getFeaturedExperiences;
+export const getEventById = async (id: string): Promise<Event | null> => {
+  try {
+    const experiences = await fetchExperiencesWithCache();
+    const experience = experiences.find(exp => exp.id === id);
+    return experience ? convertExperienceToEvent(experience) : null;
+  } catch (error) {
+    // noop
+    return null;
+  }
+};
+
+// Categories (static for now, could be fetched from backend in future)
 export const categories = [
-  { name: 'Anniversary', slug: 'anniversary', icon: '💕' },
-  { name: 'Birthdays', slug: 'birthdays', icon: '🎂' },
-  { name: 'Gifts', slug: 'gifts', icon: '🎁' },
-  { name: 'Candlelight Dinners', slug: 'candlelight', icon: '🕯️' },
-  { name: 'Decorations', slug: 'decorations', icon: '🎨' },
-  { name: 'Festivals', slug: 'festivals', icon: '🎊' },
-  { name: 'Kids Celebrations', slug: 'kids', icon: '🎪' },
-  { name: 'Corporate Events', slug: 'corporate', icon: '💼' }
+  { name: 'Anniversary', slug: 'anniversary' },
+  { name: 'Birthdays', slug: 'birthdays' },
+  { name: 'Gifts', slug: 'gifts' },
+  { name: 'Candlelight Dinners', slug: 'candlelight' },
+  { name: 'Decorations', slug: 'decorations' },
+  { name: 'Festivals', slug: 'festivals' },
+  { name: 'Kids Celebrations', slug: 'kids' },
+  { name: 'Corporate Events', slug: 'corporate' }
 ];
 
-export const getEventsByCategory = (category: string) => {
-  return events.filter(event => event.category.toLowerCase() === category.toLowerCase());
-};
-
-export const getFeaturedEvents = () => {
-  return events.filter(event => event.isPopular || event.isNew).slice(0, 6);
-};
-
-export const getEventById = (id: string) => {
-  return events.find(event => event.id === id);
+// Seed the backend with data (useful for development)
+export const seedBackend = async (): Promise<boolean> => {
+  try {
+    const result: ApiResponse<{ count: number }> = await api.post(`/seed`);
+    if (result.success) {
+      // Successfully seeded
+      // Clear cache to force fresh fetch
+      experiencesCache = null;
+      lastFetchTime = 0;
+      return true;
+    }
+    return false;
+  } catch (error) {
+    // noop
+    return false;
+  }
 };

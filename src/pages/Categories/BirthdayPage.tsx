@@ -1,27 +1,19 @@
-import React, { useState } from 'react';
+//
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { 
-  Filter, 
-  SortAsc, 
-  Grid, 
-  List, 
   Star, 
   MapPin, 
   Clock, 
   Users,
   Heart,
-  ShoppingCart,
-  Search,
-  ChevronDown
+  ShoppingCart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Slider } from '@/components/ui/slider';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import Navbar from '@/components/Navbar';
 import OccasionNav from '@/components/OccasionNav';
 import Footer from '@/components/Footer';
@@ -30,22 +22,50 @@ import anniversaryImage from '@/assets/anniversary-event.jpg';
 import corporateImage from '@/assets/corporate-event.jpg';
 
 const BirthdayPage = () => {
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [showFilters, setShowFilters] = useState(false);
-  const [priceRange, setPriceRange] = useState([1000, 10000]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState('popular');
+  const [viewMode] = useState<'grid' | 'list'>('grid');
+  const [selectedCategories] = useState<string[]>([]);
+  const priceRange = [0, Infinity];
+  const [sortBy, setSortBy] = useState<'recommended' | 'price-low' | 'price-high'>('recommended');
 
   const subcategories = [
-    { name: 'For Him', slug: 'for-him', count: 45, icon: '👨' },
-    { name: 'For Her', slug: 'for-her', count: 52, icon: '👩' },
-    { name: 'Kids', slug: 'kids', count: 38, icon: '👶' },
-    { name: '1st Birthday', slug: 'first-birthday', count: 28, icon: '🎂' },
-    { name: '18th Birthday', slug: 'eighteenth-birthday', count: 15, icon: '🎉' },
-    { name: 'Car Boot Surprise', slug: 'car-boot', count: 12, icon: '🚗' },
-    { name: 'Terrace Party', slug: 'terrace', count: 20, icon: '🏠' },
-    { name: 'Rosegold Theme', slug: 'rosegold', count: 25, icon: '🌹' }
+    { name: 'For Him', slug: 'for-him', count: 45 },
+    { name: 'For Her', slug: 'for-her', count: 52 },
+    { name: 'Kids', slug: 'kids', count: 38 },
+    { name: '1st Birthday', slug: 'first-birthday', count: 28 },
+    { name: '18th Birthday', slug: 'eighteenth-birthday', count: 15 },
+    { name: 'Car Boot Surprise', slug: 'car-boot', count: 12 },
+    { name: 'Terrace Party', slug: 'terrace', count: 20 },
+    { name: 'Rosegold Theme', slug: 'rosegold', count: 25 }
   ];
+
+  // gradients removed per new image-forward design
+
+  const subcategoryImages: Record<string, string> = {
+    'for-him': anniversaryImage,
+    'for-her': birthdayImage,
+    'kids': birthdayImage,
+    'first-birthday': birthdayImage,
+    'eighteenth-birthday': anniversaryImage,
+    'car-boot': corporateImage,
+    'terrace': birthdayImage,
+    'rosegold': birthdayImage
+  };
+
+  const eventsSectionRef = useRef<HTMLDivElement | null>(null);
+  const [showSortBar, setShowSortBar] = useState(false);
+
+  useEffect(() => {
+    if (!eventsSectionRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        setShowSortBar(entry.isIntersecting);
+      },
+      { root: null, threshold: 0.1 }
+    );
+    observer.observe(eventsSectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   const birthdayEvents = [
     {
@@ -141,13 +161,7 @@ const BirthdayPage = () => {
     }
   ];
 
-  const handleCategoryToggle = (category: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
-    );
-  };
+  const handleCategoryToggle = (_category: string) => {};
 
   const filteredEvents = birthdayEvents.filter(event => {
     const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(event.category);
@@ -161,173 +175,70 @@ const BirthdayPage = () => {
       <Navbar />
       <OccasionNav />
       
-      {/* Hero Section */}
-      <section className="relative h-64 bg-gradient-to-r from-pink-500 to-purple-600">
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="relative z-10 container mx-auto px-4 h-full flex items-center">
-          <div className="text-white">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Birthday Celebrations</h1>
-            <p className="text-xl md:text-2xl text-gray-200">
-              Make every birthday unforgettable with our magical setups
-            </p>
-          </div>
+      {/* Hero Section - Full-bleed image, no text */}
+      <section className="relative h-[40vh] overflow-hidden">
+        <div className="w-screen relative left-1/2 -translate-x-1/2 h-full">
+          <div 
+            className="w-full h-full bg-cover bg-center"
+            style={{ backgroundImage: `url(${birthdayImage})` }}
+          />
         </div>
       </section>
 
-      {/* Subcategories */}
+      {/* Subcategories - Round scrollable image cards */}
       <section className="py-8 bg-white border-b">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-wrap gap-4">
-            {subcategories.map((subcategory) => (
+        <div className="w-screen relative left-1/2 -translate-x-1/2">
+          <div className="flex overflow-x-auto scrollbar-hide gap-4 pb-2 px-4 md:px-6 lg:px-8">
+            {subcategories.map((subcategory, idx) => (
               <Link
                 key={subcategory.slug}
                 to={`/birthdays/${subcategory.slug}`}
-                className="flex items-center space-x-2 px-4 py-2 rounded-full border border-gray-200 hover:border-primary hover:bg-primary/5 transition-colors"
+                className="flex-shrink-0 w-48 text-center group"
               >
-                <span className="text-lg">{subcategory.icon}</span>
-                <span className="font-medium">{subcategory.name}</span>
-                <Badge variant="secondary" className="text-xs">
-                  {subcategory.count}
-                </Badge>
+                <div className="relative mx-auto w-48 h-48 rounded-full overflow-hidden ring-4 ring-primary/10 bg-gray-100">
+                  <img
+                    src={subcategoryImages[subcategory.slug] || birthdayImage}
+                    alt={subcategory.name}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <div className="mt-3">
+                  <div className="text-base md:text-lg font-semibold text-gray-900">{subcategory.name}</div>
+                </div>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Filters and Search */}
-      <section className="py-6 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Search birthday events..."
-                  className="pl-10 w-64"
-                />
-              </div>
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center space-x-2"
-              >
-                <Filter className="w-4 h-4" />
-                <span>Filters</span>
-                <ChevronDown className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <div className="flex items-center space-x-4">
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48">
-                  <SelectValue placeholder="Sort by" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="popular">Most Popular</SelectItem>
-                  <SelectItem value="price-low">Price: Low to High</SelectItem>
-                  <SelectItem value="price-high">Price: High to Low</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="newest">Newest First</SelectItem>
-                </SelectContent>
-              </Select>
-              
-              <div className="flex border border-gray-200 rounded-lg">
-                <Button
-                  variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('grid')}
-                  className="rounded-r-none"
-                >
-                  <Grid className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="rounded-l-none"
-                >
-                  <List className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Advanced Filters */}
-          {showFilters && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="mt-6 p-6 bg-white rounded-lg border"
-            >
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div>
-                  <h3 className="font-medium mb-3">Price Range</h3>
-                  <div className="space-y-2">
-                    <Slider
-                      value={priceRange}
-                      onValueChange={setPriceRange}
-                      max={20000}
-                      step={500}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>₹{priceRange[0].toLocaleString()}</span>
-                      <span>₹{priceRange[1].toLocaleString()}</span>
-                    </div>
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-medium mb-3">Categories</h3>
-                  <div className="space-y-2">
-                    {subcategories.map((subcategory) => (
-                      <div key={subcategory.slug} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={subcategory.slug}
-                          checked={selectedCategories.includes(subcategory.name)}
-                          onCheckedChange={() => handleCategoryToggle(subcategory.name)}
-                        />
-                        <label htmlFor={subcategory.slug} className="text-sm">
-                          {subcategory.name} ({subcategory.count})
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div>
-                  <h3 className="font-medium mb-3">Features</h3>
-                  <div className="space-y-2">
-                    {['Same Day Delivery', 'Photography', 'Catering', 'Entertainment'].map((feature) => (
-                      <div key={feature} className="flex items-center space-x-2">
-                        <Checkbox id={feature} />
-                        <label htmlFor={feature} className="text-sm">{feature}</label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </div>
-      </section>
+      {/* Filters and Search removed as per request */}
 
       {/* Events Grid */}
-      <section className="py-8">
+      <section className="py-8" ref={eventsSectionRef}>
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Birthday Events ({filteredEvents.length})
-            </h2>
+            <h2 className="text-2xl font-bold text-gray-900">All Experiences</h2>
           </div>
 
           <div className={viewMode === 'grid' 
             ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'
             : 'space-y-4'
           }>
-            {filteredEvents.map((event, index) => (
+            {([...filteredEvents].sort((a, b) => {
+              if (sortBy === 'price-low') {
+                const pa = Number(a.price.replace('₹','').replace(/,/g,''));
+                const pb = Number(b.price.replace('₹','').replace(/,/g,''));
+                return pa - pb;
+              }
+              if (sortBy === 'price-high') {
+                const pa = Number(a.price.replace('₹','').replace(/,/g,''));
+                const pb = Number(b.price.replace('₹','').replace(/,/g,''));
+                return pb - pa;
+              }
+              // recommended by rating then reviews
+              if (a.rating !== b.rating) return b.rating - a.rating;
+              return b.reviews - a.reviews;
+            })).map((event, index) => (
               <motion.div
                 key={event.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -427,25 +338,35 @@ const BirthdayPage = () => {
 
           {filteredEvents.length === 0 && (
             <div className="text-center py-12">
-              <p className="text-gray-500 text-lg">No events found matching your criteria.</p>
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => {
-                  setSelectedCategories([]);
-                  setPriceRange([1000, 10000]);
-                }}
-              >
-                Clear Filters
-              </Button>
+              <p className="text-gray-500 text-lg">No events found.</p>
             </div>
           )}
         </div>
       </section>
+
+      {showSortBar && (
+        <div className="fixed bottom-4 inset-x-0 flex justify-center z-40">
+          <div className="bg-white/90 backdrop-blur-md border border-gray-200 shadow-lg rounded-full px-3 py-1.5">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="px-3 py-1 h-auto rounded-full text-sm">
+                  Sort: {sortBy === 'price-low' ? 'Price Low to High' : sortBy === 'price-high' ? 'Price High to Low' : 'Recommended'}
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="center" className="min-w-[220px]">
+                <DropdownMenuItem onClick={() => setSortBy('recommended')}>Recommended</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('price-low')}>Price: Low to High</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setSortBy('price-high')}>Price: High to Low</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
   );
 };
 
-export default BirthdayPage;
+export default BirthdayPage;    
+//
