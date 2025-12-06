@@ -454,8 +454,8 @@ npm run lint -- --fix
 ## 📞 Support & Contact
 
 For issues, questions, or feature requests:
-- 📧 Email: support@mmeraki.com
-- 🐙 GitHub: [GitHub Repository](https://github.com/studlyf-nirvaha/mmeraki-frontend)
+- 📧 Email: yashwanthmaram59@gmail.com 
+- 🐙 GitHub: [GitHub Repository](https://github.com/24211a66a7-jpg/mmeraki-frontend.git)
 - 🌐 Website: [mmeraki.com](https://mmeraki.com/)
 
 ---
@@ -468,7 +468,7 @@ This project is proprietary software. All rights reserved.
 
 ## 👨‍💻 Development Team
 
-**mmeraki** is developed and maintained by Studlyf Nirvaha.
+**mmeraki** is developed and maintained by yashwanth_maram
 
 ---
 
@@ -629,11 +629,6 @@ npm run seed             # Seed database
 2. Check CORS_ORIGINS in `backend/.env` includes `http://localhost:8080`
 3. Clear browser cache
 
-### More help?
-- Run: `node test-connection.js`
-- Read: [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md)
-- Check: [PROJECT_STATUS.md](./PROJECT_STATUS.md)
-
 ---
 
 ## 🚢 Production Deployment
@@ -674,12 +669,6 @@ MIT License
 ---
 
 ## 🆘 Need Help?
-
-**📖 Documentation Order:**
-1. [START_HERE.md](./START_HERE.md) - Quick start (read first!)
-2. [SETUP_INSTRUCTIONS.md](./SETUP_INSTRUCTIONS.md) - Detailed setup
-3. [QUICK_REFERENCE.md](./QUICK_REFERENCE.md) - Commands & API
-4. [PROJECT_STATUS.md](./PROJECT_STATUS.md) - Configuration
 
 **🧪 Test Connection:**
 ```bash
