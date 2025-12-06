@@ -8,7 +8,6 @@ import {
   MapPin, 
   Calendar, 
   Star, 
-  Heart, 
   Settings,
   Edit,
   Save,
@@ -60,6 +59,10 @@ const Profile = () => {
     push: true,
     marketing: false
   });
+
+  // Dynamic data: orders only
+  const [ordersData, setOrdersData] = useState<any[]>([]);
+  const [isLoadingLists, setIsLoadingLists] = useState(false);
 
   // Form state for editing
   const [formData, setFormData] = useState({
@@ -191,8 +194,8 @@ const Profile = () => {
     );
   }
 
-  // Mock orders data
-  const orders = [
+  // Fallback orders data if API not available
+  const fallbackOrders = [
     {
       id: 'MM2024001',
       date: '2024-01-15',
@@ -249,27 +252,7 @@ const Profile = () => {
     }
   ];
 
-  // Mock wishlist data
-  const wishlist = [
-    {
-      id: '1',
-      title: 'Luxury Anniversary Setup',
-      image: anniversaryImage,
-      price: 7999,
-      originalPrice: 9999,
-      rating: 4.9,
-      reviews: 89
-    },
-    {
-      id: '2',
-      title: 'Premium Birthday Party',
-      image: birthdayImage,
-      price: 5999,
-      originalPrice: 6999,
-      rating: 4.8,
-      reviews: 156
-    }
-  ];
+  
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -283,6 +266,27 @@ const Profile = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
+
+  // Fetch (if available) user orders
+  useEffect(() => {
+    const fetchLists = async () => {
+      if (!isAuthenticated) return;
+      setIsLoadingLists(true);
+      try {
+        // Orders (if your backend exposes a user orders endpoint)
+        try {
+          const res: any = await api.get('/orders');
+          const items = Array.isArray(res?.orders) ? res.orders : Array.isArray(res?.data) ? res.data : [];
+          setOrdersData(items);
+        } catch (_) {
+          setOrdersData([]);
+        }
+      } finally {
+        setIsLoadingLists(false);
+      }
+    };
+    fetchLists();
+  }, [isAuthenticated, api]);
 
   const getStatusIcon = (status: string) => {
     switch (status) {
@@ -365,10 +369,9 @@ const Profile = () => {
 
         {/* Profile Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="wishlist">Wishlist</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
@@ -380,7 +383,7 @@ const Profile = () => {
                   <CardTitle className="text-sm font-medium text-gray-600">Total Orders</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{user.past_orders?.length || 0}</div>
+                  <div className="text-2xl font-bold">{(ordersData.length || user.past_orders?.length || 0)}</div>
                   <p className="text-xs text-gray-600">All time</p>
                 </CardContent>
               </Card>
@@ -390,20 +393,12 @@ const Profile = () => {
                   <CardTitle className="text-sm font-medium text-gray-600">Total Spent</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">₹{user.past_orders?.reduce((total, order) => total + (order.total || 0), 0).toLocaleString() || 0}</div>
+                  <div className="text-2xl font-bold">₹{(Array.isArray(ordersData) ? ordersData.reduce((t: number, o: any) => t + (o.total_amount || o.total || 0), 0) : (user.past_orders?.reduce((total, order) => total + (order.total || 0), 0) || 0)).toLocaleString()}</div>
                   <p className="text-xs text-gray-600">All time</p>
                 </CardContent>
               </Card>
               
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium text-gray-600">Wishlist Items</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{user.wishlisted_items?.length || 0}</div>
-                  <p className="text-xs text-gray-600">Saved items</p>
-                </CardContent>
-              </Card>
+              
             </div>
 
             {/* Recent Orders */}
@@ -413,26 +408,27 @@ const Profile = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {orders.slice(0, 3).map((order) => (
+                  {(ordersData.length ? ordersData : fallbackOrders).slice(0, 3).map((order: any) => (
                     <div key={order.id} className="flex items-center justify-between p-4 border rounded-lg">
                       <div className="flex items-center space-x-4">
                         <img
-                          src={order.items[0].image}
-                          alt={order.items[0].title}
+                          src={order.items?.[0]?.image || order.thumbnail_url || '/placeholder.svg'}
+                          alt={(order.items?.[0]?.title || order.event?.title || 'Experience') as string}
                           className="w-16 h-16 object-cover rounded"
                         />
                         <div>
-                          <h4 className="font-medium">{order.items[0].title}</h4>
-                          <p className="text-sm text-gray-600">Order #{order.id}</p>
+                          <h4 className="font-medium">{order.items?.[0]?.title || order.event?.title || 'Experience'}</h4>
+                          <p className="text-sm text-gray-600">Order #{(order.id || '').toString()}</p>
                           <p className="text-sm text-gray-600">
-                            {order.eventDate} at {order.eventTime}
+                            {(order.selected_date || order.eventDate || 'Date not set')}
+                            {order.selected_time || order.eventTime ? ` at ${order.selected_time || order.eventTime}` : ''}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="font-medium">₹{order.total.toLocaleString()}</div>
-                        <Badge className={`text-xs ${getStatusColor(order.status)}`}>
-                          {order.status}
+                        <div className="font-medium">₹{(order.total_amount || order.total || 0).toLocaleString()}</div>
+                        <Badge className={`text-xs ${getStatusColor(order.status || order.order_status)}`}>
+                          {(order.status || order.order_status || '').toString()}
                         </Badge>
                       </div>
                     </div>
@@ -455,44 +451,46 @@ const Profile = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-6">
-                  {orders.map((order) => (
+                  {(ordersData.length ? ordersData : fallbackOrders).map((order: any) => (
                     <div key={order.id} className="border rounded-lg p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div>
-                          <h3 className="font-semibold">Order #{order.id}</h3>
+                          <h3 className="font-semibold">Order #{(order.id || '').toString()}</h3>
                           <p className="text-sm text-gray-600">
                             Placed on {new Date(order.date).toLocaleDateString()}
                           </p>
                         </div>
                         <div className="text-right">
-                          <div className="font-semibold">₹{order.total.toLocaleString()}</div>
-                          <Badge className={`text-xs ${getStatusColor(order.status)}`}>
-                            {getStatusIcon(order.status)}
-                            <span className="ml-1 capitalize">{order.status}</span>
+                          <div className="font-semibold">₹{(order.total_amount || order.total || 0).toLocaleString()}</div>
+                          <Badge className={`text-xs ${getStatusColor(order.status || order.order_status)}`}>
+                            {getStatusIcon(order.status || order.order_status)}
+                            <span className="ml-1 capitalize">{(order.status || order.order_status || '').toString()}</span>
                           </Badge>
                         </div>
                       </div>
                       
                       <div className="space-y-3">
-                        {order.items.map((item, index) => (
+                        {(order.items || []).map((item: any, index: number) => (
                           <div key={index} className="flex items-center space-x-3">
                             <img
-                              src={item.image}
-                              alt={item.title}
+                              src={item.image || item.thumbnail_url || '/placeholder.svg'}
+                              alt={item.title || 'Item'}
                               className="w-12 h-12 object-cover rounded"
                             />
                             <div className="flex-1">
-                              <h4 className="font-medium">{item.title}</h4>
-                              <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                              <h4 className="font-medium">{item.title || order.event?.title || 'Experience'}</h4>
+                              <p className="text-sm text-gray-600">Qty: {item.quantity || 1}</p>
                             </div>
-                            <div className="font-medium">₹{item.price.toLocaleString()}</div>
+                            <div className="font-medium">₹{(item.price || order.total_amount || 0).toLocaleString()}</div>
                           </div>
                         ))}
                       </div>
                       
                       <div className="flex items-center justify-between mt-4 pt-4 border-t">
                         <div className="text-sm text-gray-600">
-                          Event Date: {order.eventDate} at {order.eventTime}
+                          {order.selected_date || order.eventDate ? (
+                            <>Event Date: {(order.selected_date || order.eventDate)}{order.selected_time || order.eventTime ? ` at ${(order.selected_time || order.eventTime)}` : ''}</>
+                          ) : 'Event Date: Not set'}
                         </div>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm">
@@ -518,69 +516,7 @@ const Profile = () => {
             </Card>
           </TabsContent>
 
-          {/* Wishlist Tab */}
-          <TabsContent value="wishlist" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>My Wishlist</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {wishlist.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Heart className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">Your wishlist is empty</h3>
-                    <p className="text-gray-600 mb-4">Save events you love to your wishlist</p>
-                    <Button asChild>
-                      <Link to="/birthdays">Browse Events</Link>
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {wishlist.map((item) => (
-                      <div key={item.id} className="group">
-                        <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-                          <div className="relative">
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="absolute top-2 right-2 bg-white/80 hover:bg-white"
-                            >
-                              <Heart className="w-4 h-4 fill-red-500 text-red-500" />
-                            </Button>
-                          </div>
-                          <CardContent className="p-4">
-                            <h3 className="font-semibold mb-2">{item.title}</h3>
-                            <div className="flex items-center space-x-2 mb-2">
-                              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                              <span className="text-sm text-gray-600">
-                                {item.rating} ({item.reviews} reviews)
-                              </span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <div>
-                                <span className="text-lg font-bold text-primary">₹{item.price.toLocaleString()}</span>
-                                {item.originalPrice && (
-                                  <span className="text-sm text-gray-500 line-through ml-2">
-                                    ₹{item.originalPrice.toLocaleString()}
-                                  </span>
-                                )}
-                              </div>
-                              <Button size="sm">Add to Cart</Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
+          
 
           {/* Settings Tab */}
           <TabsContent value="settings" className="space-y-6">

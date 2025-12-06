@@ -7,7 +7,7 @@ import { getExperiencesByCategoryAndSubcategory } from '@/data/events';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Heart, ShoppingCart, Star } from 'lucide-react';
+import { ShoppingCart, Star } from 'lucide-react';
 
 interface EventItem {
   id: string;
@@ -97,7 +97,7 @@ const CategoryListing: React.FC = () => {
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="text-base md:text-lg font-semibold text-gray-900">{event.title}</h3>
                         <Button size="icon" variant="ghost" className="bg-white hover:bg-white/90 border border-gray-200 rounded-full">
-                          <Heart className="w-4 h-4 text-rose-500" />
+                          
                         </Button>
                       </div>
                       <div className="flex items-center gap-2 mb-3">

@@ -6,7 +6,6 @@ import {
   MapPin, 
   Clock, 
   Users, 
-  Heart, 
   Share2, 
   Calendar,
   Check,
@@ -65,7 +64,7 @@ const EventDetail = () => {
   const [guestCount, setGuestCount] = useState(1);
   const [selectedPackage, setSelectedPackage] = useState('basic');
   const [showBookingForm, setShowBookingForm] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  
   const [event, setEvent] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -739,14 +738,6 @@ const EventDetail = () => {
 
                 {/* Action Buttons */}
                 <div className="absolute top-4 right-4 flex space-x-2">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="bg-white/90 hover:bg-white shadow-lg"
-                    onClick={() => setIsWishlisted(!isWishlisted)}
-                  >
-                    <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
-                  </Button>
                   <Button size="icon" variant="ghost" className="bg-white/90 hover:bg-white shadow-lg">
                     <Share2 className="w-5 h-5 text-gray-600" />
                   </Button>
@@ -827,9 +818,7 @@ const EventDetail = () => {
                             ⭐ Featured
                           </Badge>
                         )}
-                        <Button size="icon" variant="ghost" className="bg-white/80 hover:bg-white">
-                          <Heart className="w-4 h-4" />
-                        </Button>
+                        
                       </div>
                     </div>
                     <div className="p-4">

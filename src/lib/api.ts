@@ -21,7 +21,7 @@ export interface ApiError extends Error {
   details?: unknown;
 }
 
-const DEFAULT_BASE = (import.meta as { env?: { VITE_API_URL?: string } })?.env?.VITE_API_URL || 'https://mmeraki-backend1.vercel.app';
+const DEFAULT_BASE = (import.meta as { env?: { VITE_API_URL?: string } })?.env?.VITE_API_URL || 'https://mmeraki-backend1-kappa.vercel.app';
 
 export class ApiClient {
   private readonly baseUrl: string;

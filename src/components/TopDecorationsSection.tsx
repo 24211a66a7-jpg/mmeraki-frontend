@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, Star, MapPin, Clock, Users } from 'lucide-react';
+import { Star, MapPin, Clock, Users } from 'lucide-react';
 import { getEventsByCategory, getExperiencesBySubcategories } from '@/data/events';
 import { useFetchControl } from '@/hooks/useFetchControl';
 import { Event } from '@/data/events';
@@ -91,7 +91,7 @@ const TopDecorationsSection: React.FC<TopDecorationsSectionProps> = ({
           }}
         />
         <button className="absolute top-2 right-2 p-2 bg-white/90 rounded-full hover:bg-white transition-colors">
-          <Heart className="w-4 h-4 text-gray-700 hover:text-red-500" />
+          
         </button>
         {event.isPopular && (
           <div className="absolute top-2 left-2 bg-amber-500 text-white px-2 py-1 rounded-full text-xs font-semibold">
@@ -148,7 +148,7 @@ const TopDecorationsSection: React.FC<TopDecorationsSectionProps> = ({
             Book Now
           </Link>
           <button className="p-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors">
-            <Heart className="w-4 h-4 text-gray-600" />
+            
           </button>
         </div>
       </div>

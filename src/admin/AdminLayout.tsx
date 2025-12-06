@@ -2,13 +2,9 @@ import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
-  LayoutDashboard, 
   Calendar, 
   ShoppingCart, 
-  Users, 
-  BarChart3, 
-  LogOut,
-  Tag
+  LogOut
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/context/AuthContext';
@@ -26,11 +22,8 @@ const AdminLayout = () => {
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
     { name: 'Manage Events', href: '/admin/events', icon: Calendar },
-    { name: 'Categories', href: '/admin/categories', icon: Tag },
     { name: 'Orders', href: '/admin/orders', icon: ShoppingCart },
-    { name: 'Users', href: '/admin/users', icon: Users },
   ];
 
   return (

@@ -7,7 +7,6 @@ import {
   MapPin, 
   Clock, 
   Users,
-  Heart,
   ShoppingCart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -263,7 +262,7 @@ const BirthdayPage = () => {
                     </div>
                     <div className="absolute top-4 right-4">
                       <Button size="icon" variant="ghost" className="bg-white/80 hover:bg-white">
-                        <Heart className="w-4 h-4" />
+                        
                       </Button>
                     </div>
                   </div>

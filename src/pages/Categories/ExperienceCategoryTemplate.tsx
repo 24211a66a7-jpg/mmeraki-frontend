@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Star, MapPin, Clock, Users, Heart, ShoppingCart } from 'lucide-react';
+import { Star, MapPin, Clock, Users, ShoppingCart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -130,7 +130,7 @@ const ExperienceCategoryTemplate: React.FC<ExperienceCategoryTemplateProps> = ({
                     </div>
                     <div className="absolute top-4 right-4">
                       <Button size="icon" variant="ghost" className="bg-white/80 hover:bg-white">
-                        <Heart className="w-4 h-4" />
+                        
                       </Button>
                     </div>
                   </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Search, Heart, ShoppingCart, User, Menu, X, ChevronDown, HelpCircle, MapPin, Phone } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, ChevronDown, HelpCircle, MapPin, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -133,9 +133,7 @@ const Navbar = () => {
                       <DropdownMenuItem asChild>
                         <Link to="/profile">My Orders</Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/profile">Wishlist</Link>
-                      </DropdownMenuItem>
+                      
                       {user?.isAdmin && (
                         <DropdownMenuItem asChild>
                           <Link to="/admin/events">Add New Listing</Link>

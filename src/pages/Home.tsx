@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Star, Users, Calendar, Heart, Gift, Sparkles, ChevronLeft, ChevronRight, Clock, Truck, Shield, Award, Cake } from 'lucide-react';
+import { ArrowRight, Star, Users, Calendar, Gift, Sparkles, ChevronLeft, ChevronRight, Clock, Truck, Shield, Award, Cake } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -103,7 +103,7 @@ const Home = () => {
       image: anniversaryImage,
       link: '/kids/welcome-baby',
       color: 'from-sky-500 to-blue-600',
-      icon: <Heart className="w-8 h-8" />
+      icon: <Star className="w-8 h-8" />
     },
     {
       title: 'House Warming',
@@ -124,7 +124,7 @@ const Home = () => {
       image: anniversaryImage,
       link: '/anniversary',
       color: 'from-indigo-500 to-purple-600',
-      icon: <Heart className="w-8 h-8" />
+      icon: <Star className="w-8 h-8" />
     }
   ];
 

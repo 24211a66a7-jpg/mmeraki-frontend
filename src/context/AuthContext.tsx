@@ -6,6 +6,7 @@ export interface User {
   id: string;
   full_name: string;
   email: string;
+  role?: 'user' | 'admin';
   phone_number?: string;
   profile_icon?: string;
   current_location: string;
@@ -63,8 +64,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
       if (response?.success) {
         const profileData = await api.get<any>('/auth/profile');
-        const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim().toLowerCase());
-        const isAdmin = profileData.user?.role === 'admin' || (!!profileData.user?.email && adminEmails.includes(String(profileData.user.email).toLowerCase()));
+        // Check if user has admin role in database AND is the specific admin email
+        const hasAdminRole = profileData.user?.role === 'admin';
+        const isAdminEmail = profileData.user?.email === 'mmeraki.event@gmail.com';
+        const isAdmin = hasAdminRole && isAdminEmail;
+        
         setState({
           user: { ...profileData.user, isAdmin },
           isLoading: false,
@@ -105,8 +109,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (data.success) {
         // Store token
         localStorage.setItem('token', data.token);
-        const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim().toLowerCase());
-        const isAdmin = data.user?.role === 'admin' || (!!data.user?.email && adminEmails.includes(String(data.user.email).toLowerCase()));
+        // Check if user has admin role in database AND is the specific admin email
+        const hasAdminRole = data.user?.role === 'admin';
+        const isAdminEmail = data.user?.email === 'mmeraki.event@gmail.com';
+        const isAdmin = hasAdminRole && isAdminEmail;
         const nextUser = { ...data.user, isAdmin } as User;
         setState({ user: nextUser, isLoading: false, isAuthenticated: true });
         
@@ -145,8 +151,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       if (data.success) {
         // Store token
         localStorage.setItem('token', data.token);
-        const adminEmails = (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((e: string) => e.trim().toLowerCase());
-        const isAdmin = data.user?.role === 'admin' || (!!data.user?.email && adminEmails.includes(String(data.user.email).toLowerCase()));
+        // Check if user has admin role in database AND is the specific admin email
+        const hasAdminRole = data.user?.role === 'admin';
+        const isAdminEmail = data.user?.email === 'mmeraki.event@gmail.com';
+        const isAdmin = hasAdminRole && isAdminEmail;
         setState({
           user: { ...data.user, isAdmin },
           isLoading: false,

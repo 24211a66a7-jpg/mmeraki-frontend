@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Star, Clock, Users, MapPin, Heart } from 'lucide-react';
+import { Star, Clock, Users, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Event } from '@/data/events';
@@ -43,14 +43,7 @@ const EventCard: React.FC<EventCardProps> = ({ event, index = 0 }) => {
             )}
           </div>
 
-          {/* Heart Icon */}
-          <motion.button
-            className="absolute top-3 right-3 p-2 bg-white/80 rounded-full hover:bg-white transition-colors"
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-          >
-            <Heart className="w-4 h-4 text-gray-600 hover:text-red-500" />
-          </motion.button>
+          
 
           {/* Price */}
           <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-1">

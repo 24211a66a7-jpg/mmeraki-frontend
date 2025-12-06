@@ -4,7 +4,6 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
-import { WishlistProvider } from "./context/WishlistContext";
 import { AuthProvider } from "./context/AuthContext";
 import { LocationProvider } from "./context/LocationContext";
 
@@ -31,6 +30,7 @@ import AdminReports from "./admin/Reports";
 import AdminLogin from "./admin/AdminLogin";
 import RequireAdmin from "./admin/RequireAdmin";
 
+
 import NotFound from "./pages/NotFound";
 import CategoryListing from "./pages/CategoryListing";
 
@@ -41,8 +41,7 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <LocationProvider>
-          <WishlistProvider>
-            <CartProvider>
+          <CartProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -80,10 +79,11 @@ const App = () => (
               
               {/* Admin Routes */}
               <Route path="/admin/login" element={<AdminLogin />} />
+              
               <Route path="/admin" element={<AdminLayout />}>
                 <Route index element={<RequireAdmin><AdminDashboard /></RequireAdmin>} />
                 <Route path="events" element={<AdminEvents />} />
-                <Route path="orders" element={<RequireAdmin><AdminOrders /></RequireAdmin>} />
+                <Route path="orders" element={<AdminOrders />} />
                 <Route path="users" element={<RequireAdmin><AdminUsers /></RequireAdmin>} />
                 <Route path="reports" element={<RequireAdmin><AdminReports /></RequireAdmin>} />
               </Route>
@@ -92,7 +92,6 @@ const App = () => (
             </Routes>
             </BrowserRouter>
             </CartProvider>
-          </WishlistProvider>
         </LocationProvider>
       </AuthProvider>
     </TooltipProvider>
